@@ -19,3 +19,12 @@
 读取指定的 JSON 文件。
 构建树结构。
 将树结构输出到 output.txt 文件。
+
+
+
+## Test文件夹
+设计一个接口操作json文件实现以下功能： 
+1. 利用nlohmann/json，使用TreeNode结构，使用weak_ptr和shared_ptr
+2. 将每个功能设计成一个函数可以进行调用，现在先设计两个功能，每次调用对应函数执行对应功能：
+  功能一：实现Payload中的HFData和LFData的计数并能在函数调用后输出结果
+  功能二：将树结构以缩进格式输出到一个 .txt 文件中。
