@@ -28,3 +28,5 @@
 2. 将每个功能设计成一个函数可以进行调用，现在先设计两个功能，每次调用对应函数执行对应功能：
   功能一：实现Payload中的HFData和LFData的计数并能在函数调用后输出结果
   功能二：将树结构以缩进格式输出到一个 .txt 文件中。
+### 程序运行
+clang++ -std=gnu++17 -I./include JsonInterface.cpp main.cpp -o main && ./main
