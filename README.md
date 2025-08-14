@@ -30,3 +30,11 @@
   功能二：将树结构以缩进格式输出到一个 .txt 文件中。
 ### 程序运行
 clang++ -std=gnu++17 -I./include JsonInterface.cpp main.cpp -o main && ./main
+
+
+
+### 文件结构
+接口文件: JsonInterface.h
+实现文件: JsonInterface.cpp
+示例文件: main.cpp
+

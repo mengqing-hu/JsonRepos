@@ -5,7 +5,7 @@
 int main() {
     try {
         // 读取 JSON 文件
-        std::string jsonFilePath = "/Users/humengqing/Documents/Code/VSCode/IWU/JsonRepos/Test/Data DMU/DMU_5X_TWIN_20250203-122907347/DMU_5X_TWIN_6c8d211d-1585-4def-b09a-97a3eb376267_20250203-122907663.json";
+        std::string jsonFilePath = "Data DMU/DMU_5X_TWIN_20250203-122907347/DMU_5X_TWIN_6c8d211d-1585-4def-b09a-97a3eb376267_20250203-122907663.json";
         std::ifstream ifs(jsonFilePath);
         if (!ifs.is_open()) {
             std::cerr << "无法打开 JSON 文件: " << jsonFilePath << "\n";
