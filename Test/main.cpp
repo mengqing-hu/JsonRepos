@@ -1,6 +1,9 @@
-#include "JsonInterface.h"
-#include <iostream>
+#include "JsonCollector.h"
 #include <fstream>
+#include <iostream>
+#include "include/json.hpp"
+
+using json = nlohmann::json;
 
 int main() {
     try {
@@ -14,21 +17,40 @@ int main() {
         json j;
         ifs >> j;
 
-        // 功能一：计数 HFData 和 LFData
-        int hfCount = 0, lfCount = 0;
-        countHFAndLFData(j, hfCount, lfCount);
-        std::cout << "HFData 数量: " << hfCount << "\n";
-        std::cout << "LFData 数量: " << lfCount << "\n";
+        // 创建 JsonCollector 实例
+        JsonCollector collector;
 
-        // 功能二：打印树结构到文件
-        auto root = buildTree(j);
-        std::string outputFilePath = "output.txt";
-        printTreeToFile(root, outputFilePath);
-        std::cout << "树结构已输出到: " << outputFilePath << "\n";
+        // 将 JSON 数据解析为树结构
+        collector.initializeFromJson(j);
+        collector.calculateChildNodeCount("Payload");
+        std::cout << "--------------- " << "\n";
+        // collector.viewNodeDetailsAsTree("Header");
+
+        // 统计 Payload 节点下 LFData 的数量
+        size_t lfDataCount = collector.countNodeOccurrences("LFData");
+        std::cout << "Payload 节点下 LFData 的数量: " << lfDataCount << "\n";
+
+        // 统计 Payload 节点下 HFData 的数量
+        size_t hfDataCount = collector.countNodeOccurrences("HFData");
+        std::cout << "Payload 节点下 HFData 的数量: " << hfDataCount << "\n";
+        // collector.getChildNodeCount("LFData");删除该函数
+        std::cout << "--------------- " << "\n";
+        // collector.getRoot();删除该函数
+        // collector.calculateNodeNameCount("Payload", "LFData");
+        // 查看 Payload 节点下的 LFData 信息
+        // collector.viewPayloadLFData();
+
+        // collector.getChildNodeCount("Payload");
+        // collector.calculateNodeNameCount("Payload", "LFData");删除该函数
+        // collector.printChildNodeDetails("Payload");删除该函数
+        // collector.getChildNodeCount("Payload");删除该函数
+        // 查看 Payload 节点下的 HFData 信息
+        // collector.viewPayloadHFData();
 
     } catch (const std::exception& e) {
-        std::cerr << "异常: " << e.what() << "\n";
+        std::cerr << "发生异常: " << e.what() << "\n";
         return 1;
     }
+
     return 0;
 }

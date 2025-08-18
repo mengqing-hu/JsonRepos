@@ -38,3 +38,28 @@ clang++ -std=gnu++17 -I./include JsonInterface.cpp main.cpp -o main && ./main
 实现文件: JsonInterface.cpp
 示例文件: main.cpp
 
+
+<!-- clang++ -std=gnu++17 -I./include TreeNode.h JsonCollector.h main.cpp -o main -->
+clang++ -std=gnu++17 -I./include main.cpp -o main
+./main
+
+
+g++ -std=c++17 -o main main.cpp JsonCollector.cpp TreeNode.cpp -Iinclude
+./main
+
+
+
+<!-- 统计HFData和LFData.png  -->
+        size_t lfDataCount = collector.countNodeOccurrences("LFData");
+        std::cout << "Payload 节点下 LFData 的数量: " << lfDataCount << "\n";
+
+        // 统计 Payload 节点下 HFData 的数量
+        size_t hfDataCount = collector.countNodeOccurrences("HFData");
+        std::cout << "Payload 节点下 HFData 的数量: " << hfDataCount << "\n";
+
+<!-- 查看Header下的节点信息.png  -->
+        collector.viewNodeDetailsAsTree("Header");
+<!-- 查看LFData.png  -->
+        collector.viewPayloadLFData();
+<!-- 展示HFData.png -->
+        collector.viewPayloadHFData();
