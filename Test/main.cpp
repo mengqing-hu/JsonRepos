@@ -23,7 +23,7 @@ int main() {
         // 将 JSON 数据解析为树结构
         collector.initializeFromJson(j);
 
-        collector.viewPayloadHFDataWithSignals();
+        // collector.viewPayloadHFDataWithSignals();
         // collector.calculateChildNodeCount("Payload");
         // std::cout << "--------------- " << "\n";
         // collector.viewNodeDetailsAsTree("Header");
@@ -43,6 +43,8 @@ int main() {
         // collector.viewPayloadLFData();
         // // 查看 Payload 节点下的 HFData 信息
         // collector.viewPayloadHFData();
+
+        collector.exportHFDataToCSV("output.csv");
 
 
     } catch (const std::exception& e) {

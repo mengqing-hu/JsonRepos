@@ -1,5 +1,6 @@
 #include "JsonCollector.h"
 #include "include/json.hpp" // Include nlohmann::json
+#include <fstream>
 
 // 递归解析 JSON 数据并构建 TreeNode 树
 tmw::SharedPtr<TreeNode> parseJsonToTreeNode(const std::string& name, const json& j) {
@@ -421,3 +422,75 @@ void JsonCollector::viewPayloadHFDataWithSignals() const {
 
 //     printHFDataRecursive(payloadNode);
 // }
+
+
+
+void JsonCollector::exportHFDataToCSV(const std::string& filename) const {
+    if (!hfSignals) {
+        extractHFSignalsFromHeader();
+    }
+    if (!hfSignals) {
+        std::cerr << "无法导出: 未找到 SignalListHFData\n";
+        return;
+    }
+
+    auto payloadNode = findNodeByName("Payload");
+    if (!payloadNode) {
+        std::cerr << "无法导出: 未找到 Payload\n";
+        return;
+    }
+
+    std::ofstream outFile(filename);
+    if (!outFile.is_open()) {
+        std::cerr << "无法打开文件: " << filename << "\n";
+        return;
+    }
+
+    // ===== 写表头 =====
+    outFile << "HFDataIndex,RowIndex";
+    for (const auto& signalNode : hfSignals->getChildren()) {
+        std::string name, axis, type;
+        auto nameNode = signalNode->findChildByName("Name");
+        if (nameNode) name = nameNode->getValue().ToString();
+        auto axisNode = signalNode->findChildByName("Axis");
+        if (axisNode) axis = axisNode->getValue().ToString();
+        auto typeNode = signalNode->findChildByName("Type");
+        if (typeNode) type = typeNode->getValue().ToString();
+
+        outFile << ",\"" << name << " (" << axis << ", " << type << ")\"";
+    }
+    outFile << "\n";
+
+    // ===== 写数据 =====
+    size_t hfIndex = 0;
+    std::function<void(const tmw::SharedPtr<TreeNode>&)> traversePayload =
+    [&](const tmw::SharedPtr<TreeNode>& currentNode) {
+        if (currentNode->getName() == "HFData") {
+            hfIndex++;
+
+            const auto& hfRows = currentNode->getChildren();
+            for (size_t rowIdx = 0; rowIdx < hfRows.size(); ++rowIdx) {
+                const auto& row = hfRows[rowIdx];
+                const auto& values = row->getChildren();
+
+                // 写行头（HFData 序号，Row 序号）
+                outFile << hfIndex << "," << (rowIdx + 1);
+
+                // 写数值
+                for (size_t i = 0; i < values.size(); ++i) {
+                    outFile << "," << values[i]->getValue().ToString();
+                }
+                outFile << "\n";
+            }
+        }
+
+        for (const auto& child : currentNode->getChildren()) {
+            traversePayload(child);
+        }
+    };
+
+    traversePayload(payloadNode);
+
+    outFile.close();
+    std::cout << "HFData 已导出到 CSV 文件: " << filename << "\n";
+}
