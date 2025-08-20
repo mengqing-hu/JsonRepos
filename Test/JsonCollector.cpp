@@ -494,3 +494,84 @@ void JsonCollector::exportHFDataToCSV(const std::string& filename) const {
     outFile.close();
     std::cout << "HFData 已导出到 CSV 文件: " << filename << "\n";
 }
+
+void JsonCollector::viewPayloadLFDataWithSignals() const {
+    auto payloadNode = findNodeByName("Payload");
+    if (!payloadNode) {
+        std::cerr << "Node not found: Payload\n";
+        return;
+    }
+
+    auto headerNode = findNodeByName("Header");
+    if (!headerNode) {
+        std::cerr << "Node not found: Header\n";
+        return;
+    }
+
+    // Find Header.SignalListLFData
+    auto lfDefNode = headerNode->findChildByName("SignalListLFData");
+    if (!lfDefNode) {
+        std::cerr << "Node not found: SignalListLFData\n";
+        return;
+    }
+
+    size_t lfIndex = 0; // 外层索引，表示第几个 LFData
+
+    std::function<void(const tmw::SharedPtr<TreeNode>&)> traversePayload =
+    [&](const tmw::SharedPtr<TreeNode>& currentNode) {
+        if (currentNode->getName() == "LFData") {
+            lfIndex++;
+            const auto& records = currentNode->getChildren();
+
+            for (size_t rowIdx = 0; rowIdx < records.size(); ++rowIdx) {
+                auto record = records[rowIdx];
+
+                std::cout << "---- LFData[" << lfIndex << "] Row[" << rowIdx + 1 << "] ----\n";
+
+                // 收集字段
+                std::string address, value, value_type, timestamp, hfpc;
+                for (const auto& field : record->getChildren()) {
+                    if (field->getName() == "address") {
+                        address = field->getValue().ToString();
+                    } else if (field->getName() == "value") {
+                        value = field->getValue().ToString();
+                    } else if (field->getName() == "value_type") {
+                        value_type = field->getValue().ToString();
+                    } else if (field->getName() == "timestamp") {
+                        timestamp = field->getValue().ToString();
+                    } else if (field->getName() == "HFProbeCounter") {
+                        hfpc = field->getValue().ToString();
+                    }
+                }
+
+                // 在 Header.SignalListLFData 中找匹配定义
+                std::string samplingPeriod, label;
+                for (const auto& def : lfDefNode->getChildren()) {
+                    auto pathNode = def->findChildByName("path");
+                    if (pathNode && pathNode->getValue().ToString() == address) {
+                        auto spNode = def->findChildByName("samplingPeriod");
+                        if (spNode) samplingPeriod = spNode->getValue().ToString();
+                        auto lbNode = def->findChildByName("label");
+                        if (lbNode) label = lbNode->getValue().ToString();
+                        break;
+                    }
+                }
+
+                // 打印所有信息
+                std::cout << "HFProbeCounter = " << hfpc << "\n";
+                std::cout << "timestamp = " << timestamp << "\n";
+                std::cout << address
+                          << " (" << value_type
+                          << ", samplingPeriod=" << samplingPeriod
+                          << ", label=" << label
+                          << ") = " << value << "\n";
+            }
+        }
+
+        for (const auto& child : currentNode->getChildren()) {
+            traversePayload(child);
+        }
+    };
+
+    traversePayload(payloadNode);
+}

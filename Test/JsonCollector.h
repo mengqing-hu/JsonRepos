@@ -53,6 +53,9 @@ public:
     // 新函数：带信号名的 HFData 输出
     void viewPayloadHFDataWithSignals() const;
     void exportHFDataToCSV(const std::string& filename) const;
+    
+    void viewPayloadLFDataWithSignals() const;
+
 };
 
 #endif // JSON_COLLECTOR_H
