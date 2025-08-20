@@ -22,21 +22,23 @@ int main() {
 
         // 将 JSON 数据解析为树结构
         collector.initializeFromJson(j);
-        collector.calculateChildNodeCount("Payload");
-        std::cout << "--------------- " << "\n";
-        collector.viewNodeDetailsAsTree("Header");
 
-        // 统计 Payload 节点下 LFData 的数量
-        size_t lfDataCount = collector.countNodeOccurrences("LFData");
-        std::cout << "Payload 节点下 LFData 的数量: " << lfDataCount << "\n";
+        collector.viewPayloadHFDataWithSignals();
+        // collector.calculateChildNodeCount("Payload");
+        // std::cout << "--------------- " << "\n";
+        // collector.viewNodeDetailsAsTree("Header");
 
-        // 统计 Payload 节点下 HFData 的数量
-        size_t hfDataCount = collector.countNodeOccurrences("HFData");
-        std::cout << "Payload 节点下 HFData 的数量: " << hfDataCount << "\n";
+        // // 统计 Payload 节点下 LFData 的数量
+        // size_t lfDataCount = collector.countNodeOccurrences("LFData");
+        // std::cout << "Payload 节点下 LFData 的数量: " << lfDataCount << "\n";
 
-        std::cout << "--------------- " << "\n";
-        collector.getRoot();
-        std::cout << "--------------- " << "\n";
+        // // 统计 Payload 节点下 HFData 的数量
+        // size_t hfDataCount = collector.countNodeOccurrences("HFData");
+        // std::cout << "Payload 节点下 HFData 的数量: " << hfDataCount << "\n";
+
+        // std::cout << "--------------- " << "\n";
+        // collector.getRoot();
+        // std::cout << "--------------- " << "\n";
         // // 查看 Payload 节点下的 LFData 信息
         // collector.viewPayloadLFData();
         // // 查看 Payload 节点下的 HFData 信息

@@ -195,3 +195,34 @@ void JsonCollector::viewPayloadLFData() const {
     printLFDataRecursive(payloadNode, 0);
 }
 
+void JsonCollector::viewPayloadHFDataWithSignals() const {
+    auto payloadNode = findNodeByName("Payload");
+    if (!payloadNode) {
+        std::cerr << "节点未找到: Payload\n";
+        return;
+    }
+
+    std::cout << "Payload 下 HFData 与信号对应信息:\n";
+
+    // 递归查找 HFData 节点
+    std::function<void(const tmw::SharedPtr<TreeNode>&)> printHFDataRecursive =
+    [&](const tmw::SharedPtr<TreeNode>& currentNode) {
+        if (currentNode->getName() == "HFData") {
+            for (const auto& row : currentNode->getChildren()) {
+                const auto& values = row->getChildren();
+
+                std::cout << "---- HFData Row ----\n";
+                for (size_t i = 0; i < values.size(); ++i) {
+                    std::string signalName = (i < hfSignals.size()) ? hfSignals[i] : "Unknown";
+                    std::cout << signalName << " = " << values[i]->getValue().ToString() << "\n";
+                }
+            }
+        }
+
+        for (const auto& child : currentNode->getChildren()) {
+            printHFDataRecursive(child);
+        }
+    };
+
+    printHFDataRecursive(payloadNode);
+}
