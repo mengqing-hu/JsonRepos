@@ -24,7 +24,7 @@ int main() {
         collector.initializeFromJson(j);
         collector.calculateChildNodeCount("Payload");
         std::cout << "--------------- " << "\n";
-        // collector.viewNodeDetailsAsTree("Header");
+        collector.viewNodeDetailsAsTree("Header");
 
         // 统计 Payload 节点下 LFData 的数量
         size_t lfDataCount = collector.countNodeOccurrences("LFData");
@@ -33,19 +33,15 @@ int main() {
         // 统计 Payload 节点下 HFData 的数量
         size_t hfDataCount = collector.countNodeOccurrences("HFData");
         std::cout << "Payload 节点下 HFData 的数量: " << hfDataCount << "\n";
-        // collector.getChildNodeCount("LFData");删除该函数
-        std::cout << "--------------- " << "\n";
-        // collector.getRoot();删除该函数
-        // collector.calculateNodeNameCount("Payload", "LFData");
-        // 查看 Payload 节点下的 LFData 信息
-        // collector.viewPayloadLFData();
 
-        // collector.getChildNodeCount("Payload");
-        // collector.calculateNodeNameCount("Payload", "LFData");删除该函数
-        // collector.printChildNodeDetails("Payload");删除该函数
-        // collector.getChildNodeCount("Payload");删除该函数
-        // 查看 Payload 节点下的 HFData 信息
+        std::cout << "--------------- " << "\n";
+        collector.getRoot();
+        std::cout << "--------------- " << "\n";
+        // // 查看 Payload 节点下的 LFData 信息
+        // collector.viewPayloadLFData();
+        // // 查看 Payload 节点下的 HFData 信息
         // collector.viewPayloadHFData();
+
 
     } catch (const std::exception& e) {
         std::cerr << "发生异常: " << e.what() << "\n";

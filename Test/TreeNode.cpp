@@ -38,9 +38,9 @@ const std::vector<tmw::SharedPtr<TreeNode>>& TreeNode::getChildren() const {
     return children_;
 }
 
-// void TreeNode::setChildren(const std::vector<tmw::SharedPtr<TreeNode>>& children) {
-//     children_ = children;
-// }
+void TreeNode::setChildren(const std::vector<tmw::SharedPtr<TreeNode>>& children) {
+    children_ = children;
+}
 
 // Add a child node
 void TreeNode::addChild(const std::shared_ptr<TreeNode>& child) {

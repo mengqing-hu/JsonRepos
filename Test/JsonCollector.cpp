@@ -54,33 +54,6 @@ void JsonCollector::initializeFromJson(const json& j) {
     root_->setChildren(children); // Set the children vector using setChildren()
 }
 
-// 打印树结构
-void JsonCollector::printTreeStructure() const {
-    std::queue<std::pair<tmw::SharedPtr<TreeNode>, int>> nodeQueue;
-    nodeQueue.push({root_, 0});
-
-    while (!nodeQueue.empty()) {
-        auto [current, depth] = nodeQueue.front();
-        nodeQueue.pop();
-
-        std::cout << std::string(depth * 2, ' ') << current->getName() << "\n";
-
-        for (const auto& child : current->getChildren()) {
-            nodeQueue.push({child, depth + 1});
-        }
-    }
-}
-
-// 查询对应节点的子节点数量
-size_t JsonCollector::getChildNodeCount(const std::string& nodeName) const {
-    auto node = findNodeByName(nodeName);
-    if (!node) {
-        std::cerr << "节点未找到: " << nodeName << "\n";
-        return 0;
-    }
-
-    return node->getChildren().size();
-}
 
 // 查询文件中含有对应节点名称的数量
 size_t JsonCollector::countNodeOccurrences(const std::string& nodeName) const {
@@ -104,25 +77,6 @@ size_t JsonCollector::countNodeOccurrences(const std::string& nodeName) const {
     return count;
 }
 
-// 查询对应节点的子节点名称和值
-void JsonCollector::printChildNodeDetails(const std::string& nodeName) const {
-    auto node = findNodeByName(nodeName);
-    if (!node) {
-        std::cerr << "节点未找到: " << nodeName << "\n";
-        return;
-    }
-
-    const auto& children = node->getChildren();
-    if (children.empty()) {
-        std::cout << "节点 " << nodeName << " 没有子节点。\n";
-        return;
-    }
-
-    std::cout << "节点 " << nodeName << " 的子节点名称:\n";
-    for (const auto& child : children) {
-        std::cout << "  节点名称: " << child->getName() << "\n";
-    }
-}
 
 void JsonCollector::calculateChildNodeCount(const std::string& nodeName) const {
     auto node = findNodeByName(nodeName);
@@ -137,24 +91,6 @@ void JsonCollector::calculateChildNodeCount(const std::string& nodeName) const {
     std::cout << "节点 " << nodeName << " 的子节点数量: " << count << "\n";
 }
 
-void JsonCollector::calculateNodeNameCount(const std::string& parentNodeName, const std::string& targetNodeName) const {
-    auto parentNode = findNodeByName(parentNodeName);
-    if (!parentNode) {
-        std::cerr << "父节点未找到: " << parentNodeName << "\n";
-        return;
-    }
-
-    const auto& children = parentNode->getChildren();
-    size_t count = 0;
-
-    for (const auto& child : children) {
-        if (child->getName() == targetNodeName) {
-            count++;
-        }
-    }
-
-    std::cout << "节点 " << parentNodeName << " 下名称为 \"" << targetNodeName << "\" 的子节点数量: " << count << "\n";
-}
 
 void JsonCollector::viewNodeDetailsAsTree(const std::string& nodeName) const {
     auto node = findNodeByName(nodeName);
@@ -197,122 +133,7 @@ void JsonCollector::viewNodeDetailsAsTree(const std::string& nodeName) const {
     printNodeRecursive(node, 0, nodeName, false);
 }
 
-void JsonCollector::viewPayloadLFDataAsTree() const {
-    auto payloadNode = findNodeByName("Payload");
-    if (!payloadNode) {
-        std::cerr << "节点未找到: Payload\n";
-        return;
-    }
 
-    std::cout << "节点 Payload 下的 LFData 信息（以树结构显示）:\n";
-
-    std::function<void(const tmw::SharedPtr<TreeNode>&, int)> printLFDataRecursive = [&](const tmw::SharedPtr<TreeNode>& currentNode, int depth) {
-        if (currentNode->getName() == "LFData") {
-            std::cout << std::string(depth * 2, ' ') << "节点名称: " << currentNode->getName() << "\n";
-
-            for (const auto& child : currentNode->getChildren()) {
-                std::cout << std::string((depth + 1) * 2, ' ') << "值: " << child->getValue().ToString() << "\n";
-            }
-        }
-
-        for (const auto& child : currentNode->getChildren()) {
-            printLFDataRecursive(child, depth + 1);
-        }
-    };
-
-    printLFDataRecursive(payloadNode, 0);
-}
-
-void JsonCollector::viewPayloadHFDataAsTree() const {
-    auto headerNode = findNodeByName("Header");
-    if (!headerNode) {
-        std::cerr << "节点未找到: Header\n";
-        return;
-    }
-
-    auto signalListHFDataNode = headerNode->findChildByName("SignalListHFData");
-    if (!signalListHFDataNode) {
-        std::cerr << "节点未找到: SignalListHFData\n";
-        return;
-    }
-
-    // Parse SignalListHFData from the Header node
-    json signalListHFData;
-    try {
-        signalListHFData = json::parse(signalListHFDataNode->getValue().ToString());
-    } catch (const std::exception& e) {
-        std::cerr << "解析 SignalListHFData 时发生异常: " << e.what() << "\n";
-        return;
-    }
-
-    auto payloadNode = findNodeByName("Payload");
-    if (!payloadNode) {
-        std::cerr << "节点未找到: Payload\n";
-        return;
-    }
-
-    std::cout << "节点 Payload 下的 HFData 信息（以树结构显示）:\n";
-
-    // Parse SignalListHFData to create column mappings
-    std::unordered_map<int, json> columnMapping;
-    for (size_t i = 0; i < signalListHFData.size(); ++i) {
-        columnMapping[i + 1] = signalListHFData[i]; // Skip index 0 (HFProbeCounter)
-    }
-
-    // Recursive lambda function to process HFData
-    std::function<void(const tmw::SharedPtr<TreeNode>&, int)> processHFDataRecursive = [&](const tmw::SharedPtr<TreeNode>& currentNode, int depth) {
-        if (currentNode->getName() == "HFData") {
-            for (const auto& row : currentNode->getChildren()) {
-                auto hfDataRowNode = tmw::MakeShared<TreeNode>("HFData_Row");
-
-                // Ensure row has children
-                if (row->getChildren().empty()) {
-                    std::cerr << "HFData 行没有子节点\n";
-                    continue;
-                }
-
-                // Add HFProbeCounter
-                hfDataRowNode->addChild(tmw::MakeShared<TreeNode>("HFProbeCounter", row->getChildren()[0]->getValue()));
-
-                for (size_t col = 1; col < row->getChildren().size(); ++col) {
-                    // Ensure columnMapping contains the column
-                    if (columnMapping.find(col) == columnMapping.end()) {
-                        std::cerr << "列号 " << col << " 在 SignalListHFData 中未找到\n";
-                        continue;
-                    }
-
-                    const auto& signal = columnMapping[col];
-                    std::string name = signal["Name"];
-                    std::string axis = signal["Axis"];
-                    std::string group = name.substr(0, name.find('|'));
-
-                    auto groupNode = hfDataRowNode->findOrCreateChild(group);
-                    groupNode->addChild(tmw::MakeShared<TreeNode>(axis, row->getChildren()[col]->getValue()));
-                }
-
-                // Print the constructed TreeNode
-                std::function<void(const tmw::SharedPtr<TreeNode>&, int)> printTreeNode = [&](const tmw::SharedPtr<TreeNode>& node, int depth) {
-                    std::cout << std::string(depth * 2, ' ') << node->getName();
-                    if (!node->getValue().ToString().empty()) {
-                        std::cout << ": " << node->getValue().ToString();
-                    }
-                    std::cout << "\n";
-                    for (const auto& child : node->getChildren()) {
-                        printTreeNode(child, depth + 1);
-                    }
-                };
-
-                printTreeNode(hfDataRowNode, depth);
-            }
-        }
-
-        for (const auto& child : currentNode->getChildren()) {
-            processHFDataRecursive(child, depth + 1);
-        }
-    };
-
-    processHFDataRecursive(payloadNode, 0);
-}
 
 void JsonCollector::viewPayloadHFData() const {
     auto payloadNode = findNodeByName("Payload");

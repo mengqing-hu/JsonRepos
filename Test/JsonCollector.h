@@ -30,27 +30,12 @@ public:
     // 初始化树结构（从 JSON 数据构建）
     void initializeFromJson(const json& j);
 
-    // 打印树结构
-    void printTreeStructure() const;
-
-    size_t getChildNodeCount(const std::string &nodeName) const;
-
     size_t countNodeOccurrences(const std::string &nodeName) const;
-
-    void printChildNodeDetails(const std::string &nodeName) const;
 
     void calculateChildNodeCount(const std::string &nodeName) const;
 
-    void calculateNodeNameCount(const std::string &parentNodeName, const std::string &targetNodeName) const;
-
     void viewNodeDetailsAsTree(const std::string &nodeName) const;
 
-    // 查询 Payload 下的 LFData
-    void viewPayloadLFDataAsTree() const;
-
-    // 查询 Payload 下的 HFData
-    void viewPayloadHFDataAsTree() const;
-    void viewPayloadHFDataAsTree(const json &signalListHFData) const;
     void viewPayloadHFData() const;
     void viewPayloadLFData() const;
 
