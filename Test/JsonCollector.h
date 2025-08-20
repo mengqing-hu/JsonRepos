@@ -15,12 +15,21 @@ using json = nlohmann::json;
 
 class JsonCollector: public std::enable_shared_from_this<JsonCollector> {
 private:
-    tmw::SharedPtr<TreeNode> root_; // 根节点
+    // tmw::SharedPtr<TreeNode> root_; // 根节点
 
-    // 动态 HF 信号缓存
-    mutable std::vector<std::string> hfSignals;
+    // // 动态 HF 信号缓存
+    // mutable std::vector<std::string> hfSignals;
 
-    // 辅助函数：从 Header.SignalListHFData 提取信号
+    // // 三个向量分别存 Name / Axis / Type
+    // // mutable std::vector<std::string> hfNames;
+    // // mutable std::vector<std::string> hfAxes;
+    // // mutable std::vector<std::string> hfTypes;
+    // // 辅助函数：从 Header.SignalListHFData 提取信号
+    // void extractHFSignalsFromHeader() const;
+    
+    tmw::SharedPtr<TreeNode> root_; 
+    mutable tmw::SharedPtr<TreeNode> hfSignals; // 指向 Header.SignalListHFData
+
     void extractHFSignalsFromHeader() const;
 
 public:

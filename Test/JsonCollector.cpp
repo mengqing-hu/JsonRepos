@@ -195,36 +195,89 @@ void JsonCollector::viewPayloadLFData() const {
     printLFDataRecursive(payloadNode, 0);
 }
 
-void JsonCollector::extractHFSignalsFromHeader() const {
-    hfSignals.clear();
+// void JsonCollector::extractHFSignalsFromHeader() const {
+//     hfSignals.clear();
 
+//     auto headerNode = findNodeByName("Header");
+//     if (!headerNode) {
+//         std::cerr << "节点未找到: Header\n";
+//         return;
+//     }
+
+//     // 在 Header 下找 SignalListHFData
+//     auto signalListNode = headerNode->findChildByName("SignalListHFData");
+//     if (!signalListNode) {
+//         std::cerr << "节点未找到: SignalListHFData\n";
+//         return;
+//     }
+
+//     // 遍历 SignalListHFData 的子节点
+//     for (const auto& signalNode : signalListNode->getChildren()) {
+//         auto nameNode = signalNode->findChildByName("Name");
+//         if (nameNode) {
+//             hfSignals.push_back(nameNode->getValue().ToString());
+//         }
+//     }
+
+//     std::cout << "已提取 HF 信号数量: " << hfSignals.size() << "\n";
+// }
+// void JsonCollector::viewPayloadHFDataWithSignals() const {
+//     // 先动态提取信号名
+//     if (hfSignals.empty()) {
+//         extractHFSignalsFromHeader();
+//     }
+
+//     auto payloadNode = findNodeByName("Payload");
+//     if (!payloadNode) {
+//         std::cerr << "节点未找到: Payload\n";
+//         return;
+//     }
+
+//     std::cout << "Payload 下 HFData 与信号对应信息:\n";
+
+//     std::function<void(const tmw::SharedPtr<TreeNode>&)> printHFDataRecursive =
+//     [&](const tmw::SharedPtr<TreeNode>& currentNode) {
+//         if (currentNode->getName() == "HFData") {
+//             for (const auto& row : currentNode->getChildren()) {
+//                 const auto& values = row->getChildren();
+
+//                 std::cout << "---- HFData Row ----\n";
+//                 for (size_t i = 0; i < values.size(); ++i) {
+//                     std::string signalName = (i < hfSignals.size()) ? hfSignals[i] : "Unknown";
+//                     std::cout << signalName << " = " << values[i]->getValue().ToString() << "\n";
+//                 }
+//             }
+//         }
+
+//         for (const auto& child : currentNode->getChildren()) {
+//             printHFDataRecursive(child);
+//         }
+//     };
+
+//     printHFDataRecursive(payloadNode);
+// }
+void JsonCollector::extractHFSignalsFromHeader() const {
     auto headerNode = findNodeByName("Header");
     if (!headerNode) {
         std::cerr << "节点未找到: Header\n";
         return;
     }
 
-    // 在 Header 下找 SignalListHFData
-    auto signalListNode = headerNode->findChildByName("SignalListHFData");
-    if (!signalListNode) {
+    hfSignals = headerNode->findChildByName("SignalListHFData");
+    if (!hfSignals) {
         std::cerr << "节点未找到: SignalListHFData\n";
         return;
     }
 
-    // 遍历 SignalListHFData 的子节点
-    for (const auto& signalNode : signalListNode->getChildren()) {
-        auto nameNode = signalNode->findChildByName("Name");
-        if (nameNode) {
-            hfSignals.push_back(nameNode->getValue().ToString());
-        }
-    }
-
-    std::cout << "已提取 HF 信号数量: " << hfSignals.size() << "\n";
+    std::cout << "已找到 HF 信号数组，数量: " << hfSignals->getChildren().size() << "\n";
 }
+
 void JsonCollector::viewPayloadHFDataWithSignals() const {
-    // 先动态提取信号名
-    if (hfSignals.empty()) {
+    if (!hfSignals) {
         extractHFSignalsFromHeader();
+    }
+    if (!hfSignals) {
+        return;
     }
 
     auto payloadNode = findNodeByName("Payload");
@@ -243,8 +296,24 @@ void JsonCollector::viewPayloadHFDataWithSignals() const {
 
                 std::cout << "---- HFData Row ----\n";
                 for (size_t i = 0; i < values.size(); ++i) {
-                    std::string signalName = (i < hfSignals.size()) ? hfSignals[i] : "Unknown";
-                    std::cout << signalName << " = " << values[i]->getValue().ToString() << "\n";
+                    if (i < hfSignals->getChildren().size()) {
+                        auto signalNode = hfSignals->getChildren()[i];
+                        std::string name, axis, type;
+
+                        auto nameNode = signalNode->findChildByName("Name");
+                        if (nameNode) name = nameNode->getValue().ToString();
+
+                        auto axisNode = signalNode->findChildByName("Axis");
+                        if (axisNode) axis = axisNode->getValue().ToString();
+
+                        auto typeNode = signalNode->findChildByName("Type");
+                        if (typeNode) type = typeNode->getValue().ToString();
+
+                        std::cout << name << " (" << axis << ", " << type << ")"
+                                  << " = " << values[i]->getValue().ToString() << "\n";
+                    } else {
+                        std::cout << "UnknownSignal[" << i << "] = " << values[i]->getValue().ToString() << "\n";
+                    }
                 }
             }
         }

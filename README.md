@@ -63,5 +63,6 @@ g++ -std=c++17 -o main main.cpp JsonCollector.cpp TreeNode.cpp -Iinclude
         collector.viewPayloadLFData();
 <!-- 展示HFData.png -->
         collector.viewPayloadHFData();
-<!-- 查看HFdata并于Header中的信号对应.png -->
+        
+<!-- 查看HFdata并于Header中的信号对应_improved.png -->
         collector.viewPayloadHFDataWithSignals();
